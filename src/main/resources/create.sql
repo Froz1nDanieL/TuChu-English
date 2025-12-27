@@ -88,3 +88,30 @@ CREATE TABLE `user_article_record` (
     UNIQUE KEY `uk_user_article` (`userId`, `articleId`) COMMENT '用户文章唯一索引',
     KEY `idx_last_read_time` (`lastReadTime`) COMMENT '最后阅读时间索引'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户阅读记录表';
+
+-- auto-generated definition
+create table user
+(
+    id           bigint auto_increment comment 'id'
+        primary key,
+    userAccount  varchar(256)                           not null comment '账号',
+    userPassword varchar(512)                           not null comment '密码',
+    userEmail    varchar(256)                           null comment '邮箱',
+    userName     varchar(256)                           null comment '用户昵称',
+    userAvatar   varchar(1024)                          null comment '用户头像',
+    userProfile  varchar(512)                           null comment '用户简介',
+    userRole     varchar(256) default 'user'            not null comment '用户角色：user/admin',
+    editTime     datetime     default CURRENT_TIMESTAMP not null comment '编辑时间',
+    createTime   datetime     default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime   datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete     tinyint      default 0                 not null comment '是否删除',
+    constraint uk_userAccount
+        unique (userAccount)
+)
+    comment '用户';
+
+-- 为用户表添加邮箱唯一索引（确保一个邮箱只能注册一个账号）
+ALTER TABLE `user` ADD UNIQUE KEY `uk_email` (`userEmail`);
+
+-- 为用户表添加邮箱普通索引（优化邮箱查询性能）
+ALTER TABLE `user` ADD KEY `idx_email` (`userEmail`);

@@ -16,6 +16,7 @@ import com.mushan.msenbackend.model.vo.UserVO;
 import com.mushan.msenbackend.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,24 +30,21 @@ public class UserController {
     private UserService userService;
 
     /**
-     * 用户注册
+     * 用户注册（已禁用，请使用邮箱注册）
+     * @deprecated 用户只能通过邮箱注册，请使用 /user/email/register 接口
      */
+    @Deprecated
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
-        ThrowUtils.throwIf(userRegisterRequest == null, ErrorCode.PARAMS_ERROR);
-        String userAccount = userRegisterRequest.getUserAccount();
-        String userPassword = userRegisterRequest.getUserPassword();
-        String checkPassword = userRegisterRequest.getCheckPassword();
-        long result = userService.userRegister(userAccount, userPassword, checkPassword);
-        return ResultUtils.success(result);
+        throw new BusinessException(ErrorCode.OPERATION_ERROR, "账号注册已禁用，请使用邮箱注册");
     }
 
     /**
-     * 用户登录
-     *
-     * @param userLoginRequest
-     * @param request
-     * @return
+     * 用户登录（支持账号/邮箱登录）
+     * 
+     * @param userLoginRequest 登录请求，userAccount 可以是账号或邮箱
+     * @param request HTTP请求
+     * @return 登录用户信息
      */
     @PostMapping("/login")
     public BaseResponse<LoginUserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
@@ -181,6 +179,44 @@ public class UserController {
         List<UserVO> userVOList = userService.getUserVOList(userPage.getRecords());
         userVOPage.setRecords(userVOList);
         return ResultUtils.success(userVOPage);
+    }
+    
+    // ==================== 邮箱注册登录功能 ====================
+    
+    /**
+     * 发送注册验证码
+     */
+    @PostMapping("/email/register/code")
+    public BaseResponse<Boolean> sendRegisterCode(@RequestBody @Valid SendCodeRequest request) {
+        userService.sendRegisterCode(request.getUserEmail());
+        return ResultUtils.success(true);
+    }
+    
+    /**
+     * 邮箱注册
+     */
+    @PostMapping("/email/register")
+    public BaseResponse<Long> emailRegister(@RequestBody @Valid EmailRegisterRequest request) {
+        long userId = userService.emailRegister(request);
+        return ResultUtils.success(userId);
+    }
+    
+    /**
+     * 发送重置密码验证码
+     */
+    @PostMapping("/email/reset/code")
+    public BaseResponse<Boolean> sendResetPasswordCode(@RequestBody @Valid SendCodeRequest request) {
+        userService.sendResetPasswordCode(request.getUserEmail());
+        return ResultUtils.success(true);
+    }
+    
+    /**
+     * 重置密码
+     */
+    @PostMapping("/email/reset/password")
+    public BaseResponse<Boolean> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+        boolean result = userService.resetPassword(request);
+        return ResultUtils.success(result);
     }
 
 }

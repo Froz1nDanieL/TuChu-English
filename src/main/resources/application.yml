@@ -4,7 +4,7 @@ server:
     context-path: /api
 spring:
   application:
-    name: tu-cang-backend
+    name: ms-en-backend
   profiles:
     active: local
   main:
@@ -48,6 +48,22 @@ spring:
     timeout: 2592000s # 30天
     redis:
       namespace: spring:session
+  # 邮件配置
+  mail:
+    host: smtp.163.com  # 网易163邮箱SMTP服务器（126邮箱用smtp.126.com）
+    port: 465  # 使用SSL端口
+    username: YourEmail  # 需要替换为实际邮箱
+    password: YourCode     # 需要替换为网易邮箱授权码（非登录密码）
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true  # 启用SSL加密
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+            port: 465
+    default-encoding: UTF-8
 # 接口文档配置
 knife4j:
   enable: true
@@ -69,6 +85,7 @@ mybatis-plus:
       logic-delete-field: isDelete # 全局逻辑删除的实体字段名
       logic-delete-value: 1 # 逻辑已删除值（默认为 1）
       logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
+
 # Sa-Token配置
 sa-token:
   # token名称 (同时也是cookie名称)
