@@ -24,9 +24,17 @@ import com.mushan.msenbackend.service.UserlearnplanService;
 import com.mushan.msenbackend.service.UserwordrecordService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -268,5 +276,85 @@ public class WordLearnController {
         Page<WordRecordVO> collectedWords = userwordrecordService.getCollectedWords(
                 loginUser.getId(), wordType, pageNo, pageSize);
         return ResultUtils.success(collectedWords);
+    }
+
+    /**
+     * 清空生词本
+     */
+    @DeleteMapping("/collected/clear")
+    public BaseResponse<Integer> clearCollectedWords(@RequestParam(required = false) String wordType,
+                                                      HttpServletRequest httpRequest) {
+        User loginUser = userService.getLoginUser(httpRequest);
+        Integer count = userwordrecordService.clearCollectedWords(loginUser.getId(), wordType);
+        return ResultUtils.success(count);
+    }
+
+    // ==================== 单词发音接口 ====================
+
+    /**
+     * 获取单词发音
+     * 直接返回有道词典的音频流
+     * 
+     * @param word 单词
+     * @param type 发音类型：1-英音(uk)，2-美音(us)，默认为1
+     * @param response HTTP响应
+     */
+    @GetMapping("/pronunciation")
+    public void getWordPronunciation(@RequestParam String word,
+                                     @RequestParam(defaultValue = "1") Integer type,
+                                     HttpServletResponse response) {
+        try {
+            // 参数校验
+            ThrowUtils.throwIf(StringUtils.isBlank(word), ErrorCode.PARAMS_ERROR, "单词不能为空");
+            ThrowUtils.throwIf(type != 1 && type != 2, ErrorCode.PARAMS_ERROR, "发音类型只能是1(英音)或2(美音)");
+            
+            // 构建有道词典发音URL
+            String encodedWord = URLEncoder.encode(word.trim(), StandardCharsets.UTF_8);
+            String youdaoUrl = String.format("https://dict.youdao.com/dictvoice?audio=%s&type=%d", 
+                                            encodedWord, type);
+            
+            log.info("获取单词发音: word={}, type={}, url={}", word, type, youdaoUrl);
+            
+            // 创建HTTP连接
+            URL url = new URL(youdaoUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+            
+            // 检查响应状态
+            int responseCode = connection.getResponseCode();
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                log.error("获取发音失败: word={}, responseCode={}", word, responseCode);
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "获取发音失败");
+            }
+            
+            // 设置响应头
+            response.setContentType("audio/mpeg");
+            response.setHeader("Content-Disposition", 
+                             String.format("inline; filename=\"%s_%s.mp3\"", word, type == 1 ? "uk" : "us"));
+            response.setHeader("Cache-Control", "public, max-age=86400"); // 缓存1天
+            
+            // 读取音频流并写入响应
+            try (InputStream inputStream = connection.getInputStream();
+                 OutputStream outputStream = response.getOutputStream()) {
+                
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+                outputStream.flush();
+            }
+            
+            log.info("单词发音获取成功: word={}, type={}", word, type);
+            
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("获取单词发音异常: word={}, type={}", word, type, e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "获取发音失败: " + e.getMessage());
+        }
     }
 }

@@ -139,4 +139,13 @@ public interface UserwordrecordService extends IService<Userwordrecord> {
      * @return 收藏数
      */
     Integer countCollectedWords(Long userId, String wordType);
+
+    /**
+     * 清空生词本（取消收藏）
+     *
+     * @param userId   用户ID
+     * @param wordType 词书类型（可为null表示所有）
+     * @return 清空的单词数量
+     */
+    Integer clearCollectedWords(Long userId, String wordType);
 }

@@ -542,22 +542,18 @@ public class UserwordrecordServiceImpl extends ServiceImpl<UserwordrecordMapper,
             return resultPage;
         }
 
-        // 获取单词信息
+
+        // 批量查询所有单词信息
         Set<Integer> wordIds = recordPage.getRecords().stream()
                 .map(Userwordrecord::getWordId)
                 .collect(Collectors.toSet());
-
-        // 需要根据不同的wordType分别查询
-        Map<Integer, Engdict> wordMap = new HashMap<>();
-        for (Userwordrecord record : recordPage.getRecords()) {
-            QueryWrapper<Engdict> engdictWrapper = new QueryWrapper<>();
-            engdictWrapper.eq("id", record.getWordId());
-            engdictWrapper.eq("tag", record.getWordType()); // 必须带上分片键，精确匹配
-            Engdict word = engdictMapper.selectOne(engdictWrapper);
-            if (word != null) {
-                wordMap.put(word.getId(), word);
-            }
-        }
+        
+        QueryWrapper<Engdict> engdictWrapper = new QueryWrapper<>();
+        engdictWrapper.in("id", wordIds);
+        List<Engdict> words = engdictMapper.selectList(engdictWrapper);
+        
+        Map<Integer, Engdict> wordMap = words.stream()
+                .collect(Collectors.toMap(Engdict::getId, w -> w));
 
         List<WordRecordVO> voList = recordPage.getRecords().stream()
                 .map(record -> {
@@ -593,6 +589,36 @@ public class UserwordrecordServiceImpl extends ServiceImpl<UserwordrecordMapper,
         queryWrapper.eq("wordType", wordType);
         queryWrapper.eq("isCollect", 1);
         return (int) this.count(queryWrapper);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Integer clearCollectedWords(Long userId, String wordType) {
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户ID不能为空");
+        }
+
+        // 构建查询条件
+        QueryWrapper<Userwordrecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userId", userId);
+        queryWrapper.eq("isCollect", 1);
+        if (StringUtils.isNotBlank(wordType)) {
+            queryWrapper.eq("wordType", wordType);
+        }
+
+        // 先统计数量
+        int count = (int) this.count(queryWrapper);
+        if (count == 0) {
+            return 0;
+        }
+
+        // 批量更新收藏状态为0
+        Userwordrecord updateRecord = new Userwordrecord();
+        updateRecord.setIsCollect(0);
+        updateRecord.setUpdateTime(new Date());
+        this.update(updateRecord, queryWrapper);
+
+        return count;
     }
 
     /**
