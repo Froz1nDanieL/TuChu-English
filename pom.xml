@@ -115,6 +115,34 @@
             <artifactId>druid-spring-boot-3-starter</artifactId>
             <version>1.2.23</version>
         </dependency>
+        
+        <!-- Apache POI - Word文档处理 -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+        
+        <!-- Apache PDFBox - PDF文档处理 -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.27</version>
+        </dependency>
+
+        <!-- Apache Tika for document type detection -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>2.9.1</version>
+        </dependency>
+
+        <!-- Jsoup for HTML processing -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.16.1</version>
+        </dependency>
     </dependencies>
 
     <build>

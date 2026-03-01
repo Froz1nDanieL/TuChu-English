@@ -107,3 +107,9 @@ word:
   import:
     enabled: true
     file-path: classpath:ecdict.csv
+
+# 百度翻译配置
+baidu:
+  translate:
+    app-id: ${BAIDU_TRANSLATE_APP_ID:your_app_id_here}
+    secret-key: ${BAIDU_TRANSLATE_SECRET_KEY:your_secret_key_here}

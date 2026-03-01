@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 public enum ErrorCode {
 
+    // 通用错误码
     SUCCESS(0, "ok"),
     PARAMS_ERROR(40000, "请求参数错误"),
     NOT_LOGIN_ERROR(40100, "未登录"),
@@ -26,7 +27,13 @@ public enum ErrorCode {
     EMAIL_SEND_FAILED(50002, "邮件发送失败"),
     PASSWORD_NOT_MATCH(40006, "两次输入的密码不一致"),
     OLD_PASSWORD_ERROR(40007, "原密码错误"),
-    PASSWORD_SAME_AS_OLD(40008, "新密码不能与原密码相同");
+    PASSWORD_SAME_AS_OLD(40008, "新密码不能与原密码相同"),
+    
+    // 翻译相关错误码
+    TRANSLATE_SERVICE_ERROR(50003, "翻译服务异常"),
+    DOCUMENT_PARSE_ERROR(50004, "文档解析失败"),
+    DOCUMENT_TRANSLATE_ERROR(50005, "文档翻译失败"),
+    DOCUMENT_FORMAT_ERROR(50006, "文档格式保持失败");
 
     /**
      * 状态码
