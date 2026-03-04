@@ -115,3 +115,41 @@ ALTER TABLE `user` ADD UNIQUE KEY `uk_email` (`userEmail`);
 
 -- 为用户表添加邮箱普通索引（优化邮箱查询性能）
 ALTER TABLE `user` ADD KEY `idx_email` (`userEmail`);
+
+-- 作文题目表
+CREATE TABLE `writing_topic` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `title` VARCHAR(200) DEFAULT NULL COMMENT '作文题目标题（简短概括）',
+    `description` TEXT NOT NULL COMMENT '作文题目描述/写作要求（详细内容）',
+    `examType` VARCHAR(32) NOT NULL COMMENT '考试类型（cet4/cet6/ielts/toefl/gk/zk/ky等）',
+    `wordLimit` INT DEFAULT NULL COMMENT '字数要求',
+    `timeLimit` INT DEFAULT NULL COMMENT '时间限制（分钟）',
+    `createTime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updateTime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_exam_type` (`examType`) COMMENT '考试类型索引'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='作文题目表';
+
+-- 用户作文记录表
+CREATE TABLE `user_writing_record` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `userId` BIGINT NOT NULL COMMENT '用户 ID',
+    `topicId` BIGINT NOT NULL COMMENT '作文题目 ID（对应 writing_topic.id）',
+    `content` TEXT NOT NULL COMMENT '用户作文原文',
+    `correctStatus` TINYINT NOT NULL DEFAULT 0 COMMENT '批改状态（0-待批改 1-批改中 2-已完成 3-批改失败）',
+    `score` DECIMAL(5,2) DEFAULT NULL COMMENT '得分',
+    `fullScore` DECIMAL(5,2) DEFAULT NULL COMMENT '满分',
+    `comment` TEXT COMMENT '评语',
+    `errorWords` TEXT COMMENT '错词列表（JSON 格式）',
+    `recommendedWords` TEXT COMMENT '推荐词列表（JSON 格式）',
+    `correctTime` DATETIME DEFAULT NULL COMMENT '批改时间',
+    `wordCount` INT DEFAULT 0 COMMENT '作文字数统计',
+    `isDeleted` TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除（0/1）',
+    `createTime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updateTime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`userId`) COMMENT '用户 ID 索引',
+    KEY `idx_topic_id` (`topicId`) COMMENT '题目 ID 索引',
+    KEY `idx_correct_status` (`correctStatus`),
+    KEY `idx_create_time` (`createTime`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='作文题目表';

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mushan.msenbackend.mapper.UserWritingRecordMapper">
+
+    <resultMap id="BaseResultMap" type="com.mushan.msenbackend.model.entity.UserWritingRecord">
+            <id property="id" column="id" />
+            <result property="userId" column="userId" />
+            <result property="topicId" column="topicId" />
+            <result property="content" column="content" />
+            <result property="correctStatus" column="correctStatus" />
+            <result property="score" column="score" />
+            <result property="fullScore" column="fullScore" />
+            <result property="comment" column="comment" />
+            <result property="errorWords" column="errorWords" />
+            <result property="recommendedWords" column="recommendedWords" />
+            <result property="correctTime" column="correctTime" />
+            <result property="wordCount" column="wordCount" />
+            <result property="isDeleted" column="isDeleted" />
+            <result property="createTime" column="createTime" />
+            <result property="updateTime" column="updateTime" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,userId,topicId,content,correctStatus,score,
+        fullScore,comment,errorWords,recommendedWords,correctTime,
+        wordCount,isDeleted,createTime,updateTime
+    </sql>
+</mapper>

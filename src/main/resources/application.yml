@@ -64,6 +64,21 @@ spring:
             class: javax.net.ssl.SSLSocketFactory
             port: 465
     default-encoding: UTF-8
+  ai:
+    deepseek:
+      api-key: ${DEEPSEEK_API_KEY}
+      chat:
+        options:
+          model: deepseek-chat
+          temperature: 0.3
+          max-tokens: 2048
+          frequency-penalty: 0.2
+    retry:
+      max-attempts: 2
+      backoff:
+        initial-interval: 2s
+        multiplier: 2
+        max-interval: 10s
 # 接口文档配置
 knife4j:
   enable: true
