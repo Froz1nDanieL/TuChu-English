@@ -7,9 +7,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
-import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc;
 
 import java.io.*;
 import java.math.BigInteger;
