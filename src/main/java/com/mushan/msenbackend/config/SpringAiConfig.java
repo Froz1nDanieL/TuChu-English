@@ -16,10 +16,10 @@ public class SpringAiConfig {
     private Resource systemPromptResource;
 
     /**
-     * 创建 ChatClient 实例
+     * 创建作文批改专用 ChatClient 实例
      */
-    @Bean
-    public ChatClient chatClient(ChatClient.Builder builder) {
+    @Bean("essayCorrectorChat")
+    public ChatClient essayCorrectorChat(ChatClient.Builder builder) {
         return builder.defaultSystem(systemPromptResource)
                 .build();
     }
